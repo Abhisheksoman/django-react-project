@@ -14,12 +14,21 @@ export default function MyDatePickerField(props) {
             control={control}
             render={({
               field:{onChange,value},
+              fieldState:{error},
+              formState,
             }) =>(
               <DatePicker
               onChange={onChange}
               value={value} 
               label={label} 
-              sx={{width:{width}}} />
+              sx={{width:{width}}} 
+              slotProps={{
+                textField:{
+                  error:!!error,
+                  helperText:error?.message,
+                }
+              }}
+              />
             )
           }
           />
