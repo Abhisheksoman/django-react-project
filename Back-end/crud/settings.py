@@ -53,9 +53,18 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# ✅ Allow only your frontend (recommended)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:3000",  # Your Vite frontend
+    "http://127.0.0.1:3000",
 ]
+
+# ✅ (Alternative) Allow all origins (only for development)
+CORS_ALLOW_ALL_ORIGINS = True  # ❌ Not recommended for production
+
+# ✅ If you're sending cookies (for authentication)
+CORS_ALLOW_CREDENTIALS = True
+
 
 ROOT_URLCONF = 'crud.urls'
 

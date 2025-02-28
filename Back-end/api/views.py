@@ -7,6 +7,17 @@ from rest_framework.response import Response
 def home(request):
     return HttpResponse("this is a home page")
 
+
+class ProjectManagerViewSets(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+    queryset = ProjectManager.objects.all()
+    serializer = ProjectManagerSerializer
+
+    def list(self ,request):
+        queryset = self.queryset
+        serializer = self.serializer(queryset ,many=True)
+        return Response(serializer.data)
+
 class ProjectViewSets(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     queryset = Project.objects.all()

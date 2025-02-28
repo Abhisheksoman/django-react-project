@@ -1,4 +1,4 @@
-import {React,useEffect} from 'react'
+import  {React,useState,useEffect} from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import MyDatePickerField from './forms/MyDatePickerField'
 import MyMultiLineField from './forms/MyMultiLineField'
@@ -7,27 +7,29 @@ import MyTextField from './forms/MyTextField'
 import { useForm } from 'react-hook-form'
 import AxiosInstance from './Axios'
 import Dayjs from 'dayjs'
-import {useNavigate,useParams} from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
 
-const Edit = () => {
-  const Myparams = useParams()
-  const Myid = Myparams.id
-
-
+const Create = () => {
+  const [projectmanager,setprojectmanager] = useState()
+  const [loading,setLoading] = useState(true)
+  const hardcoded_options =[
+    {id:"",name:"None"},
+    {id:"Open",name:"Open"},
+    {id:"In Progress",name:"In Progress"},
+    {id:"Completed",name:"Completed"},
+  ]
   const GetData = () =>{
-    AxiosInstance.get(`project/${Myid}`).then((res) => {
-      setValue('name',res.data.name)
-      setValue('status',res.data.status)
-      setValue('comments',res.data.comments)
-      setValue('start_date',Dayjs(res.data.start_date))
-      setValue('end_date',Dayjs(res.data.end_date))
+    AxiosInstance.get(`projectmanager/`).then((res) => {
+      setprojectmanager(res.data)
+      setLoading(false)
     })
   }
 
   useEffect(()=>{
     GetData();
   },[])
-
   const navigate = useNavigate()
   const defaultValues = {
     name:'',
@@ -36,12 +38,24 @@ const Edit = () => {
     
   }
 
-  const {handleSubmit,setValue,control} = useForm({defaultValues:defaultValues})
+  const schema = yup
+  .object({
+    name: yup.string().required('Name is required'),
+    projectmanager: yup.string().required('Project Manager Should not be Empty'),
+    status: yup.string().required('Status is required'),
+    comments: yup.string(),
+    start_date:yup.date().required('Start Date Should not be Empty'),
+    end_date:yup.date().required('End Date Should not be Empty').min(yup.ref('start_date'),'End date cannot be before the start date'),
+  })
+  .required()
+
+  const {handleSubmit,control} = useForm({defaultValues:defaultValues,resolver:yupResolver(schema)})
   const submission = (data) => {
     const StartDate = Dayjs(data.start_date["$d"]).format("YYYY-MM-DD")
     const EndDate = Dayjs(data.end_date["$d"]).format("YYYY-MM-DD")
-    AxiosInstance.put(`project/${Myid}/`,{
+    AxiosInstance.post(`project/`,{
       name:data.name,
+      projectmanager:data.projectmanager,
       status:data.status,
       comments:data.comments,
       start_date:StartDate,
@@ -54,6 +68,8 @@ const Edit = () => {
   }
   return (
     <div>
+      {
+        loading?<p>Loading data ...</p>:
       <form onSubmit={handleSubmit(submission)}>
       <Box sx={{display:"flex",width:"120%",backgroundColor:"#00003f",marginBottom:"10px"}}>
         <Typography sx={{marginLeft:"20px",color:"white"}}>
@@ -97,19 +113,27 @@ const Edit = () => {
           name="status"
           control={control}
           width = {'30%'}
+          options = {hardcoded_options}
         />
         
-        <Box sx={{width:"30%"}}>
-          <Button variant='contained' type='submit' sx={{width:"100%"}}>
-            Submit
-          </Button>
-        </Box>
+    
+          <MySelectField
+            label="Project Manager"
+            name="projectmanager"
+            control={control}
+            width = {'30%'}
+            options = {projectmanager}
+          />  
       </Box>
-
+      <Box sx={{display:"flex",justifyContent:'start',marginTop:'45px'}}>
+        <Button variant='contained' type='submit' sx={{width:"30%"}}>
+              Submit
+            </Button>
       </Box>
-      </form>
+      </Box>
+      </form>}
     </div>
   )
 }
 
-export default Edit
+export default Create
