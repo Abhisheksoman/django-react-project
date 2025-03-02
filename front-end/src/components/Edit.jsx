@@ -8,12 +8,14 @@ import { useForm } from 'react-hook-form'
 import AxiosInstance from './Axios'
 import Dayjs from 'dayjs'
 import {useNavigate,useParams} from 'react-router-dom'
+import MyMultiSelectField from './forms/MyMultiSelectField'
 
 const Edit = () => {
   const Myparams = useParams()
   const Myid = Myparams.id
 
   const [projectmanager,setprojectmanager] = useState()
+  const [employees,setEmployees] = useState()
   const [loading,setLoading] = useState(true)
   const hardcoded_options =[
     {id:"",name:"None"},
@@ -26,11 +28,17 @@ const Edit = () => {
     AxiosInstance.get(`projectmanager/`).then((res) => {
       setprojectmanager(res.data)
     })
+
+    AxiosInstance.get(`employees/`).then((res) => {
+      setEmployees(res.data)
+    })
+
     AxiosInstance.get(`project/${Myid}`).then((res) => {
       setValue('name',res.data.name)
       setValue('status',res.data.status)
       setValue('comments',res.data.comments)
       setValue('projectmanager',res.data.projectmanager)
+      setValue('employees',res.data.employees)
       setValue('start_date',Dayjs(res.data.start_date))
       setValue('end_date',Dayjs(res.data.end_date))
       setLoading(false)
@@ -56,6 +64,7 @@ const Edit = () => {
     AxiosInstance.put(`project/${Myid}/`,{
       name:data.name,
       projectmanager:data.projectmanager,
+      employees:data.employees,
       status:data.status,
       comments:data.comments,
       start_date:StartDate,
@@ -123,6 +132,15 @@ const Edit = () => {
           width = {'30%'}
           options= {projectmanager}
         />
+      </Box>
+      <Box sx={{display:"flex",justifyContent:'start',marginTop:'40px',marginRight:'10px'}}>
+              <MyMultiSelectField
+                label="Employees"
+                name="employees"
+                control={control}
+                width = {'30%'}
+                options = {employees}
+              />
       </Box>
       <Box sx={{display:"flex",justifyContent:'start',marginTop:'45px'}}>
           <Button variant='contained' type='submit' sx={{width:"30%"}}>
